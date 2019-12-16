@@ -43,6 +43,16 @@ public class TableGenerator
             return;
         }
 
+        if (session.shouldFilter()) {
+            Results results = constructResults(table, session);
+            for (List<List<String>> parentAndChildRows : results) {
+                if (parentAndChildRows.size() > 0) {
+                    System.out.print(formatRow(parentAndChildRows.get(0), session));
+                }
+            }
+            return;
+        }
+
         try (OutputStreamWriter parentWriter = addFileWriterForTable(table);
                 OutputStreamWriter childWriter = table.hasChild() && !session.generateOnlyOneTable() ? addFileWriterForTable(table.getChild()) : null) {
             Results results = constructResults(table, session);
@@ -121,7 +131,7 @@ public class TableGenerator
         if (session.terminateRowsWithSeparator()) {
             stringBuilder.append(separator);
         }
-        stringBuilder.append('\n');
+        stringBuilder.append(System.lineSeparator());
         return stringBuilder.toString();
     }
 }

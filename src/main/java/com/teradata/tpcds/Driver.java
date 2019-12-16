@@ -54,6 +54,14 @@ public class Driver
             tablesToGenerate = Table.getBaseTables();
         }
 
+        if (session.getParallelism() > 0 && session.getChunkNumber() != Options.DEFAULT_CHILD) {
+            new Thread(() -> {
+                TableGenerator tableGenerator = new TableGenerator(session);
+                tablesToGenerate.forEach(tableGenerator::generateTable);
+            }).start();
+            return;
+        }
+
         for (int i = 1; i <= session.getParallelism(); i++) {
             int chunkNumber = i;
             new Thread(() -> {

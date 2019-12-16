@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import static com.teradata.tpcds.Options.DEFAULT_DIRECTORY;
 import static com.teradata.tpcds.Options.DEFAULT_DO_NOT_TERMINATE;
+import static com.teradata.tpcds.Options.DEFAULT_FILTER;
 import static com.teradata.tpcds.Options.DEFAULT_NO_SEXISM;
 import static com.teradata.tpcds.Options.DEFAULT_NULL_STRING;
 import static com.teradata.tpcds.Options.DEFAULT_OVERWRITE;
@@ -39,13 +40,9 @@ public class Session
     private final int parallelism;
     private final int chunkNumber;
     private final boolean overwrite;
+    private final boolean filter;
 
-    public Session(double scale, String targetDirectory, String suffix, Optional<Table> table, String nullString, char separator, boolean doNotTerminate, boolean noSexism, int parallelism, boolean overwrite)
-    {
-        this(scale, targetDirectory, suffix, table, nullString, separator, doNotTerminate, noSexism, parallelism, 1, overwrite);
-    }
-
-    public Session(double scale, String targetDirectory, String suffix, Optional<Table> table, String nullString, char separator, boolean doNotTerminate, boolean noSexism, int parallelism, int chunkNumber, boolean overwrite)
+    public Session(double scale, String targetDirectory, String suffix, Optional<Table> table, String nullString, char separator, boolean doNotTerminate, boolean noSexism, int parallelism, int chunkNumber, boolean overwrite, boolean filter)
     {
         this.scaling = new Scaling(scale);
         this.targetDirectory = targetDirectory;
@@ -58,6 +55,7 @@ public class Session
         this.parallelism = parallelism;
         this.chunkNumber = chunkNumber;
         this.overwrite = overwrite;
+        this.filter = filter;
     }
 
     public static Session getDefaultSession()
@@ -78,8 +76,8 @@ public class Session
                 this.noSexism,
                 this.parallelism,
                 this.chunkNumber,
-                this.overwrite
-        );
+                this.overwrite,
+                this.filter);
     }
 
     public Session withScale(double scale)
@@ -95,8 +93,8 @@ public class Session
                 this.noSexism,
                 this.parallelism,
                 this.chunkNumber,
-                this.overwrite
-        );
+                this.overwrite,
+                this.filter);
     }
 
     public Session withParallelism(int parallelism)
@@ -112,8 +110,8 @@ public class Session
                 this.noSexism,
                 parallelism,
                 this.chunkNumber,
-                this.overwrite
-        );
+                this.overwrite,
+                this.filter);
     }
 
     public Session withChunkNumber(int chunkNumber)
@@ -129,8 +127,8 @@ public class Session
                 this.noSexism,
                 this.parallelism,
                 chunkNumber,
-                this.overwrite
-        );
+                this.overwrite,
+                this.filter);
     }
 
     public Session withNoSexism(boolean noSexism)
@@ -146,8 +144,8 @@ public class Session
                 noSexism,
                 this.parallelism,
                 this.chunkNumber,
-                this.overwrite
-        );
+                this.overwrite,
+                this.filter);
     }
 
     public Scaling getScaling()
@@ -213,6 +211,11 @@ public class Session
         return overwrite;
     }
 
+    public boolean shouldFilter()
+    {
+        return filter;
+    }
+
     public String getCommandLineArguments()
     {
         StringBuilder output = new StringBuilder();
@@ -245,6 +248,9 @@ public class Session
         }
         if (overwrite != DEFAULT_OVERWRITE) {
             output.append("--overwrite ");
+        }
+        if (filter != DEFAULT_FILTER) {
+            output.append("--filter ");
         }
 
         // remove trailing space

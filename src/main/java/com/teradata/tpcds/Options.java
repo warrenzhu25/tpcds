@@ -29,7 +29,9 @@ public class Options
     public static final boolean DEFAULT_DO_NOT_TERMINATE = false;
     public static final boolean DEFAULT_NO_SEXISM = false;
     public static final int DEFAULT_PARALLELISM = 1;
+    public static final int DEFAULT_CHILD = -1;
     public static final boolean DEFAULT_OVERWRITE = false;
+    public static final boolean DEFAULT_FILTER = false;
 
     @Option(name = {"--scale", "-s"}, title = "scale", description = "Volume of data to generate in GB (Default: 1)")
     public double scale = DEFAULT_SCALE;
@@ -59,11 +61,17 @@ public class Options
                     "But on the other hand it won't be sexist.")
     public boolean noSexism = DEFAULT_NO_SEXISM;
 
-    @Option(name = {"--parallelism"}, title = "parallelism", description = "Build data in <n> separate chunks (Default: 1)")
+    @Option(name = {"--parallelism", "-p"}, title = "parallelism", description = "Build data in <n> separate chunks (Default: 1)")
     public int parallelism = DEFAULT_PARALLELISM;
+
+    @Option(name = {"--child", "-c"}, title = "child", description = "Generate <n>th chunk of the parallelized data (Default: 1)")
+    public int child = DEFAULT_CHILD;
 
     @Option(name = {"--overwrite"}, title = "overwrite", description = "Overwrite existing data files for tables")
     public boolean overwrite = DEFAULT_OVERWRITE;
+
+    @Option(name = {"--filter"}, title = "filter", description = "Output data to stdout")
+    public boolean filter = DEFAULT_FILTER;
 
     public Session toSession()
     {
@@ -77,7 +85,9 @@ public class Options
                 doNotTerminate,
                 noSexism,
                 parallelism,
-                overwrite);
+                child,
+                overwrite,
+                filter);
     }
 
     private static Optional<Table> toTableOptional(String table)
@@ -107,6 +117,10 @@ public class Options
         }
         if (parallelism < 1) {
             throw new InvalidOptionException("parallelism", Integer.toString(parallelism), "Parallelism must be >= 1");
+        }
+
+        if (child > parallelism) {
+            throw new InvalidOptionException("child", Integer.toString(child), "Child must between 1 and parallelism");
         }
     }
 }
